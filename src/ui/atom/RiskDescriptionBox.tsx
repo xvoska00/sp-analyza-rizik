@@ -17,7 +17,6 @@ const RiskDescriptionBox = ({children, label}: IProps) => {
                 "lg:w-36 lg:h-14 lg:text-lg",
                 "xl:w-40 xl:h-16 xl:text-xl"
             )}
-            data-label={label}
         >
             {children}
             <div

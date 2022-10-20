@@ -22,9 +22,9 @@ const ExOpCoverageLabel = ({children}: IProps) => {
     function getExOpCoverageColor(): string {
         const coverageNumber = Number(children);
 
-        if (coverageNumber > 80) return "bg-green-600";
-        if (coverageNumber > 60) return "bg-yellow-400";
-        if (coverageNumber > 40) return "bg-orange-400";
+        if (coverageNumber === 100) return "bg-green-600";
+        if (coverageNumber >= 90) return "bg-yellow-400";
+        if (coverageNumber >= 80) return "bg-orange-400";
         return "bg-red-600";
     }
 };

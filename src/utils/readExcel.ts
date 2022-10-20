@@ -3,12 +3,12 @@ import {
     IExcelData,
     IAnalysis,
     IRisk,
-    IDefaultData,
     SheetNameType,
     IExcelExOpData,
     IExOp,
     RiskSeverityType,
-    IPopoverInfo
+    IPopoverInfo,
+    IAktivum
 } from "types";
 
 export function getAnalysesFromExcel(): IAnalysis[] {
@@ -16,13 +16,13 @@ export function getAnalysesFromExcel(): IAnalysis[] {
     const sheetNames = file.SheetNames.filter(
         name => name !== SheetNameType.AKTIVA && name !== SheetNameType.EXOP && name !== SheetNameType.POPINFO
     );
-    const aktiva: IDefaultData[] = XLSX.utils.sheet_to_json(file.Sheets[SheetNameType.AKTIVA]);
+    const aktiva: IAktivum[] = XLSX.utils.sheet_to_json(file.Sheets[SheetNameType.AKTIVA]);
     const exOp: IExcelExOpData[] = XLSX.utils.sheet_to_json(file.Sheets[SheetNameType.EXOP]);
     const analyses: IAnalysis[] = [];
 
     for (const sheetName of sheetNames) {
         const sheetData: IExcelData[] = XLSX.utils.sheet_to_json(file.Sheets[sheetName]);
-        const expandedSheetData: IRisk[] = sheetData
+        const risks: IRisk[] = sheetData
             .map((item: IExcelData) => ({
                 ...item,
                 maxR: Math.round(item.maxR * 100) / 100,
@@ -33,21 +33,16 @@ export function getAnalysesFromExcel(): IAnalysis[] {
             .sort((itemA, itemB) => itemB.maxR - itemA.maxR);
 
         analyses.push({
-            risks: expandedSheetData,
+            risks: risks,
             id: sheetName,
             name: sheetName.split("-").join("/"),
             stats: {
                 severity: {
-                    [RiskSeverityType.CRITICAL]: expandedSheetData.filter(
-                        risk => risk.severity === RiskSeverityType.CRITICAL
-                    ).length,
-                    [RiskSeverityType.HIGH]: expandedSheetData.filter(risk => risk.severity === RiskSeverityType.HIGH)
+                    [RiskSeverityType.CRITICAL]: risks.filter(risk => risk.severity === RiskSeverityType.CRITICAL)
                         .length,
-                    [RiskSeverityType.MEDIUM]: expandedSheetData.filter(
-                        risk => risk.severity === RiskSeverityType.MEDIUM
-                    ).length,
-                    [RiskSeverityType.LOW]: expandedSheetData.filter(risk => risk.severity === RiskSeverityType.LOW)
-                        .length
+                    [RiskSeverityType.HIGH]: risks.filter(risk => risk.severity === RiskSeverityType.HIGH).length,
+                    [RiskSeverityType.MEDIUM]: risks.filter(risk => risk.severity === RiskSeverityType.MEDIUM).length,
+                    [RiskSeverityType.LOW]: risks.filter(risk => risk.severity === RiskSeverityType.LOW).length
                 }
             }
         });
@@ -69,10 +64,12 @@ export function getAnalysesFromExcel(): IAnalysis[] {
 
     return analyses;
 
-    function getAktiva(aktivaString: string): IDefaultData[] {
+    function getAktiva(aktivaString: string): IAktivum[] {
         if (!aktivaString) return [];
         if (!aktivaString.toString().includes(",")) return aktiva.filter(aktivum => aktivum.id === aktivaString);
-        return aktiva.filter(aktivum => aktivaString.toString().split(",").includes(aktivum.id.toString()));
+        return aktiva
+            .filter(aktivum => aktivaString.toString().split(",").includes(aktivum.id.toString()))
+            .map(aktivum => ({...aktivum, value: Math.round(aktivum.value)}));
     }
 
     function getExOp(exOpString: string, sheetName: string): IExOp[] {
@@ -80,10 +77,20 @@ export function getAnalysesFromExcel(): IAnalysis[] {
         if (!exOpString.toString().includes(","))
             return exOp
                 .filter(measure => measure.id === exOpString)
-                .map(measure => ({id: measure.id, name: measure.name, coverage: measure[sheetName]}));
+                .map(measure => ({
+                    id: measure.id,
+                    name: measure.name,
+                    coverage: measure[sheetName],
+                    description: measure.description
+                }));
         return exOp
             .filter(measure => exOpString.split(",").includes(measure.id))
-            .map(measure => ({id: measure.id, name: measure.name, coverage: measure[sheetName]}));
+            .map(measure => ({
+                id: measure.id,
+                name: measure.name,
+                coverage: measure[sheetName],
+                description: measure.description
+            }));
     }
 
     function getAnalysisDates(analysis: IAnalysis): {day: number; month: number; year: number} {
@@ -97,11 +104,11 @@ export function getAnalysesFromExcel(): IAnalysis[] {
 
     function getRiskSeverity(maxR: number): RiskSeverityType {
         switch (true) {
-            case maxR >= 13:
+            case maxR >= 375:
                 return RiskSeverityType.CRITICAL;
-            case maxR >= 8:
+            case maxR >= 70:
                 return RiskSeverityType.HIGH;
-            case maxR >= 4:
+            case maxR >= 15:
                 return RiskSeverityType.MEDIUM;
             default:
                 return RiskSeverityType.LOW;

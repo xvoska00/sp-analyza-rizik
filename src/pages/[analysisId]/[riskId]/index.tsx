@@ -26,6 +26,7 @@ const RiskIdDetail: NextPage<IProps> = ({analysis, analyses, popInfo, risk}) => 
         {name: "Úvod", href: "/"},
         {name: `Přehled rizik ${analysis.name}`, href: `/${analysis.id}`}
     ];
+
     return (
         <Layout title={`Riziko | ${risk.name}`}>
             <PageNavigation links={links} />
@@ -84,7 +85,7 @@ export const getStaticProps: GetStaticProps = async context => {
         const risk = analysis?.risks.find((risk: IRisk) => risk.id === riskId);
 
         return {
-            props: {analysisId, risk, popInfo, analysis, analyses}
+            props: {risk, popInfo, analysis, analyses}
         };
     }
 

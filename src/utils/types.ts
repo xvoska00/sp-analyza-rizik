@@ -11,6 +11,16 @@ export enum SheetNameType {
     EXOP = "exOp"
 }
 
+export interface IAktivum extends IDefaultData {
+    availability: number;
+    category: string;
+    confidentiality: number;
+    description: string;
+    integrity: number;
+    significance: number;
+    value: number;
+}
+
 export interface IDefaultData {
     id: string;
     name: string;
@@ -29,11 +39,13 @@ export interface IExcelData extends IDefaultData {
 }
 
 export interface IExcelExOpData extends IDefaultData {
+    description: string;
     [analysis: string]: string;
 }
 
 export interface IExOp extends IDefaultData {
     coverage: string;
+    description: string;
 }
 
 export interface IAnalysis extends IDefaultData {
@@ -68,6 +80,6 @@ export interface IRisk extends IDefaultData {
     level: number;
     maxR: number;
     exOp: IExOp[];
-    aktiva: IDefaultData[];
+    aktiva: IAktivum[];
     severity: RiskSeverityType;
 }
