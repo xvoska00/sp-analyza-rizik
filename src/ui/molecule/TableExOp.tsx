@@ -4,16 +4,15 @@ import FormattedPopupInfoExOp from "atom/FormattedPopupInfoExOp";
 import Table from "atom/Table";
 import TableCell from "atom/TableCell";
 import TableHeader from "atom/TableHeader";
-import TableRow from "atom/TableRow";
 import TableRowWithPopup from "atom/TableRowWithPopup";
 import React from "react";
-import {IRisk} from "types";
+import {IExOp} from "types";
 
 interface IProps {
-    risk: IRisk;
+    exOp: IExOp[];
 }
 
-const TableExOp = ({risk}: IProps) => {
+const TableExOp = ({exOp}: IProps) => {
     return (
         <Table
             head={
@@ -23,7 +22,7 @@ const TableExOp = ({risk}: IProps) => {
                     <TableCell></TableCell>
                 </TableHeader>
             }
-            body={risk.exOp.map(exOp => (
+            body={exOp.map(exOp => (
                 <TableRowWithPopup key={exOp.id} popupInfo={<FormattedPopupInfoExOp exOp={exOp} />}>
                     <TableCell isFullWidth={true}>{exOp.name}</TableCell>
                     <TableCell>

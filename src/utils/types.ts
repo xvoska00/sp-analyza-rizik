@@ -1,4 +1,4 @@
-export enum RiskSeverityType {
+export enum SeverityType {
     LOW = "nízká",
     MEDIUM = "střední",
     HIGH = "vysoká",
@@ -8,7 +8,8 @@ export enum RiskSeverityType {
 export enum SheetNameType {
     POPINFO = "popInfo",
     AKTIVA = "aktiva",
-    EXOP = "exOp"
+    EXOP = "exOp",
+    NAVOP = "navOp"
 }
 
 export interface IAktivum extends IDefaultData {
@@ -48,11 +49,29 @@ export interface IExOp extends IDefaultData {
     description: string;
 }
 
+export interface IExcelNavOpData extends IDefaultData {
+    description: string;
+    goal: string;
+    risks: string;
+    priority: string;
+    date: string;
+    costs: string;
+}
+
+export interface INavOp extends IDefaultData {
+    description: string;
+    goal: string;
+    risks: string[];
+    priority: SeverityType;
+    date: string;
+    costs: string;
+}
+
 export interface IAnalysis extends IDefaultData {
     risks: IRisk[];
     stats: {
         severity: {
-            [name in RiskSeverityType]: number;
+            [name in SeverityType]: number;
         };
     };
 }
@@ -80,6 +99,7 @@ export interface IRisk extends IDefaultData {
     level: number;
     maxR: number;
     exOp: IExOp[];
+    navOp: INavOp[];
     aktiva: IAktivum[];
-    severity: RiskSeverityType;
+    severity: SeverityType;
 }

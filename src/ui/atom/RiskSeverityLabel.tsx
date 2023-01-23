@@ -1,12 +1,13 @@
 import classNames from "classnames";
 import React from "react";
-import {RiskSeverityType} from "types";
+import {SeverityType} from "types";
 
 interface IProps {
-    children: RiskSeverityType;
+    children: SeverityType;
+    threeTiers?: boolean;
 }
 
-const RiskSeverityLabel = ({children}: IProps) => {
+const RiskSeverityLabel = ({children, threeTiers}: IProps) => {
     return (
         <div
             className={classNames(
@@ -23,11 +24,11 @@ const RiskSeverityLabel = ({children}: IProps) => {
 
     function getRiskSeverityColor(): string {
         switch (children) {
-            case RiskSeverityType.CRITICAL:
+            case SeverityType.CRITICAL:
                 return "bg-red-600";
-            case RiskSeverityType.HIGH:
-                return "bg-orange-400";
-            case RiskSeverityType.MEDIUM:
+            case SeverityType.HIGH:
+                return threeTiers ? "bg-red-600" : "bg-orange-400";
+            case SeverityType.MEDIUM:
                 return "bg-yellow-400";
             default:
                 return "bg-green-600";

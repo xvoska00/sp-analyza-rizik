@@ -1,6 +1,6 @@
 import Chart from "chart.js/auto";
 import React, {useEffect, useRef} from "react";
-import {RiskSeverityType} from "types";
+import {SeverityType} from "types";
 import ChartDataLabels from "chartjs-plugin-datalabels";
 
 interface IProps {
@@ -100,11 +100,11 @@ const PieChart = ({data, labels, onCallback}: IProps) => {
 
     function getLabelColor(label: string): string {
         switch (label) {
-            case RiskSeverityType.CRITICAL:
+            case SeverityType.CRITICAL:
                 return "#dc2626";
-            case RiskSeverityType.HIGH:
+            case SeverityType.HIGH:
                 return "#fb923c";
-            case RiskSeverityType.MEDIUM:
+            case SeverityType.MEDIUM:
                 return "#facc15";
             default:
                 return "#16a34a";

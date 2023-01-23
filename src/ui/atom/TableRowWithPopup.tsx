@@ -1,6 +1,4 @@
 import {Popover, Transition} from "@headlessui/react";
-import {InformationCircleIcon} from "@heroicons/react/24/outline";
-import FormattedPopupInfo from "atom/FormattedPopupInfo";
 import classNames from "classnames";
 import React, {Fragment, ReactNode, useState} from "react";
 import {usePopper} from "react-popper";

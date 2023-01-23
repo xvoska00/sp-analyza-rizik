@@ -3,16 +3,15 @@ import FormattedPopupInfoAktivum from "atom/FormattedPopupInfoAktivum";
 import Table from "atom/Table";
 import TableCell from "atom/TableCell";
 import TableHeader from "atom/TableHeader";
-import TableRow from "atom/TableRow";
 import TableRowWithPopup from "atom/TableRowWithPopup";
 import React from "react";
-import {IRisk} from "types";
+import {IAktivum} from "types";
 
 interface IProps {
-    risk: IRisk;
+    aktiva: IAktivum[];
 }
 
-const TableAktiva = ({risk}: IProps) => {
+const TableAktiva = ({aktiva}: IProps) => {
     return (
         <Table
             head={
@@ -21,7 +20,7 @@ const TableAktiva = ({risk}: IProps) => {
                     <TableCell></TableCell>
                 </TableHeader>
             }
-            body={risk.aktiva.map(aktivum => (
+            body={aktiva.map(aktivum => (
                 <TableRowWithPopup key={aktivum.id} popupInfo={<FormattedPopupInfoAktivum aktivum={aktivum} />}>
                     <TableCell isFullWidth={true}>{aktivum.name}</TableCell>
                     <TableCell>

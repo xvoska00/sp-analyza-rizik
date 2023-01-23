@@ -1,4 +1,5 @@
-import {IAnalysis, RiskSeverityType} from "types";
+import {ArrowUpRightIcon} from "@heroicons/react/24/solid";
+import {IAnalysis, SeverityType} from "types";
 import {GetStaticPaths, GetStaticProps, NextPage} from "next";
 import React, {useEffect, useMemo, useState} from "react";
 import {getAnalysesFromExcel} from "utils/readExcel";
@@ -9,25 +10,26 @@ import TableRisks from "molecule/TableRisks";
 import classNames from "classnames";
 import PieChart from "atom/PieChart";
 import SelectAnalysisLinks from "molecule/SelectAnalysisLinks";
+import Link from "next/link";
 
 interface IProps {
     analyses: IAnalysis[];
     analysis: IAnalysis;
 }
 
-const AnalysisIdDetail: NextPage<IProps> = ({analysis, analyses}) => {
+const AnalysisIdDetail: NextPage<IProps> = ({analysis, analyses}: IProps) => {
     const [analysisWithFilteredRisks, setAnalysisWithFilteredRisks] = useState<IAnalysis>();
     const data = useMemo(
         () => [
-            analysis.stats.severity[RiskSeverityType.CRITICAL],
-            analysis.stats.severity[RiskSeverityType.HIGH],
-            analysis.stats.severity[RiskSeverityType.MEDIUM],
-            analysis.stats.severity[RiskSeverityType.LOW]
+            analysis.stats.severity[SeverityType.CRITICAL],
+            analysis.stats.severity[SeverityType.HIGH],
+            analysis.stats.severity[SeverityType.MEDIUM],
+            analysis.stats.severity[SeverityType.LOW]
         ],
         [analysis]
     );
     const labels = useMemo(
-        () => [RiskSeverityType.CRITICAL, RiskSeverityType.HIGH, RiskSeverityType.MEDIUM, RiskSeverityType.LOW],
+        () => [SeverityType.CRITICAL, SeverityType.HIGH, SeverityType.MEDIUM, SeverityType.LOW],
         [analysis]
     );
     const links = [{name: "Úvod", href: "/"}];
@@ -54,6 +56,14 @@ const AnalysisIdDetail: NextPage<IProps> = ({analysis, analyses}) => {
                 <SelectAnalysisLinks analyses={analyses} analysis={analysis} />
             </PageTitle>
             <PieChart labels={labels} data={data} onCallback={onPieChartSelect} />
+            <div className="ml-3 my-5">
+                <Link href={{pathname: "/plan-zvladani-rizik", query: {analyza: analysis.id}}}>
+                    <a className="w-fit flex items-baseline text-xs text-gray-800 cursor-pointer hover:underline sm:text-sm md:text-base lg:text-lg xl:text-xl">
+                        <span>Plán zvládání rizik</span>
+                        <ArrowUpRightIcon className="w-4 h-4 ml-1 text-gray-800" />
+                    </a>
+                </Link>
+            </div>
             <TableRisks analysis={analysisWithFilteredRisks || analysis} />
         </Layout>
     );

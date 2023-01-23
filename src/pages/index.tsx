@@ -9,7 +9,7 @@ interface IProps {
     analyses: IAnalysis[];
 }
 
-const Home: NextPage<IProps> = ({analyses}) => {
+const Home: NextPage<IProps> = ({analyses}: IProps) => {
     return (
         <Layout title="Přehled zpracovaných analýz rizik">
             <PageTitle className="text-lg font-bold my-5 md:text-xl lg:text-2xl xl:text-3xl">

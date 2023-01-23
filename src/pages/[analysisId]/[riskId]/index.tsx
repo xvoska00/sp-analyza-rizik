@@ -13,6 +13,7 @@ import RiskDescriptionBoxWithPopup from "molecule/RiskDescriptionBoxWithPopup";
 import SelectAnalysisLinks from "molecule/SelectAnalysisLinks";
 import TableAktiva from "molecule/TableAktiva";
 import TableExOp from "molecule/TableExOp";
+import TableNavOp from "molecule/TableNavOp";
 
 interface IProps {
     analysis: IAnalysis;
@@ -21,7 +22,7 @@ interface IProps {
     risk: IRisk;
 }
 
-const RiskIdDetail: NextPage<IProps> = ({analysis, analyses, popInfo, risk}) => {
+const RiskIdDetail: NextPage<IProps> = ({analysis, analyses, popInfo, risk}: IProps) => {
     const links = [
         {name: "Úvod", href: "/"},
         {name: `Přehled rizik ${analysis.name}`, href: `/${analysis.id}`}
@@ -46,15 +47,20 @@ const RiskIdDetail: NextPage<IProps> = ({analysis, analyses, popInfo, risk}) => 
                 </div>
             </PageTitle>
             <RiskInfoBoxes risk={risk} popInfo={popInfo} />
-            <div className="mt-5 grid grid-cols-1 grid-flow-row auto-rows-min gap-2.5 md:grid-cols-2 md:gap-5">
+            <div className="mt-5 grid grid-cols-1 grid-flow-row auto-rows-min gap-2.5 2xl:grid-cols-2 2xl:gap-5">
                 {!!risk.exOp.length && (
                     <div>
-                        <TableExOp risk={risk} />
+                        <TableExOp exOp={risk.exOp} />
+                    </div>
+                )}
+                {!!risk.navOp.length && (
+                    <div>
+                        <TableNavOp navOp={risk.navOp} />
                     </div>
                 )}
                 {!!risk.aktiva.length && (
                     <div>
-                        <TableAktiva risk={risk} />
+                        <TableAktiva aktiva={risk.aktiva} />
                     </div>
                 )}
             </div>

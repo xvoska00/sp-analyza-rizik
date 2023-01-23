@@ -6,18 +6,25 @@ import {
     SheetNameType,
     IExcelExOpData,
     IExOp,
-    RiskSeverityType,
+    SeverityType,
     IPopoverInfo,
-    IAktivum
+    IAktivum,
+    IExcelNavOpData,
+    INavOp
 } from "types";
 
 export function getAnalysesFromExcel(): IAnalysis[] {
     const file = XLSX.readFile("./template.xlsx");
     const sheetNames = file.SheetNames.filter(
-        name => name !== SheetNameType.AKTIVA && name !== SheetNameType.EXOP && name !== SheetNameType.POPINFO
+        (name: string) =>
+            name !== SheetNameType.AKTIVA &&
+            name !== SheetNameType.EXOP &&
+            name !== SheetNameType.POPINFO &&
+            name !== SheetNameType.NAVOP
     );
     const aktiva: IAktivum[] = XLSX.utils.sheet_to_json(file.Sheets[SheetNameType.AKTIVA]);
     const exOp: IExcelExOpData[] = XLSX.utils.sheet_to_json(file.Sheets[SheetNameType.EXOP]);
+    const navOp: INavOp[] = getNavOp();
     const analyses: IAnalysis[] = [];
 
     for (const sheetName of sheetNames) {
@@ -28,7 +35,8 @@ export function getAnalysesFromExcel(): IAnalysis[] {
                 maxR: Math.round(item.maxR * 100) / 100,
                 aktiva: getAktiva(item.aktiva),
                 exOp: getExOp(item.exOp, sheetName),
-                severity: getRiskSeverity(item.maxR)
+                severity: getRiskSeverity(item.maxR),
+                navOp: navOp.filter(measure => measure.risks.includes(item.id))
             }))
             .sort((itemA, itemB) => itemB.maxR - itemA.maxR);
 
@@ -38,28 +46,21 @@ export function getAnalysesFromExcel(): IAnalysis[] {
             name: sheetName.split("-").join("/"),
             stats: {
                 severity: {
-                    [RiskSeverityType.CRITICAL]: risks.filter(risk => risk.severity === RiskSeverityType.CRITICAL)
+                    [SeverityType.CRITICAL]: risks.filter(risk => risk.severity === SeverityType.CRITICAL)
                         .length,
-                    [RiskSeverityType.HIGH]: risks.filter(risk => risk.severity === RiskSeverityType.HIGH).length,
-                    [RiskSeverityType.MEDIUM]: risks.filter(risk => risk.severity === RiskSeverityType.MEDIUM).length,
-                    [RiskSeverityType.LOW]: risks.filter(risk => risk.severity === RiskSeverityType.LOW).length
+                    [SeverityType.HIGH]: risks.filter(risk => risk.severity === SeverityType.HIGH).length,
+                    [SeverityType.MEDIUM]: risks.filter(risk => risk.severity === SeverityType.MEDIUM).length,
+                    [SeverityType.LOW]: risks.filter(risk => risk.severity === SeverityType.LOW).length
                 }
             }
         });
     }
 
     analyses.sort((analysisA: IAnalysis, analysisB: IAnalysis) => {
-        const analysisADates = getAnalysisDates(analysisA);
-        const analysisBDates = getAnalysisDates(analysisB);
+        const analysisATimestamp = getAnalysisDates(analysisA);
+        const analysisBTimestamp = getAnalysisDates(analysisB);
 
-        return (
-            (analysisBDates.year - analysisADates.year &&
-                analysisBDates.month - analysisADates.month &&
-                analysisBDates.day - analysisADates.day) ||
-            analysisBDates.year - analysisADates.year ||
-            analysisBDates.month - analysisADates.month ||
-            analysisBDates.day - analysisADates.day
-        );
+        return analysisBTimestamp - analysisATimestamp;
     });
 
     return analyses;
@@ -93,25 +94,22 @@ export function getAnalysesFromExcel(): IAnalysis[] {
             }));
     }
 
-    function getAnalysisDates(analysis: IAnalysis): {day: number; month: number; year: number} {
-        const analysisNameParts = analysis.name.split("/").map((analysisNamePart: string) => Number(analysisNamePart));
-        return {
-            day: analysisNameParts[0],
-            month: analysisNameParts[1],
-            year: analysisNameParts[2]
-        };
+    function getAnalysisDates(analysis: IAnalysis): number {
+        const analysisNameParts = analysis.name.split("/").map(analysisNamePart => Number(analysisNamePart));
+
+        return new Date(analysisNameParts[2], analysisNameParts[1] - 1, analysisNameParts[0]).getTime();
     }
 
-    function getRiskSeverity(maxR: number): RiskSeverityType {
+    function getRiskSeverity(maxR: number): SeverityType {
         switch (true) {
             case maxR >= 375:
-                return RiskSeverityType.CRITICAL;
+                return SeverityType.CRITICAL;
             case maxR >= 70:
-                return RiskSeverityType.HIGH;
+                return SeverityType.HIGH;
             case maxR >= 15:
-                return RiskSeverityType.MEDIUM;
+                return SeverityType.MEDIUM;
             default:
-                return RiskSeverityType.LOW;
+                return SeverityType.LOW;
         }
     }
 }
@@ -121,4 +119,28 @@ export function getPopoverInfo(): IPopoverInfo {
     const popoverInfos: IPopoverInfo[] = XLSX.utils.sheet_to_json(file.Sheets[SheetNameType.POPINFO]);
 
     return popoverInfos[0];
+}
+
+export function getNavOp(): INavOp[] {
+    const file = XLSX.readFile("./template.xlsx");
+    const navOpData: IExcelNavOpData[] = XLSX.utils.sheet_to_json(file.Sheets[SheetNameType.NAVOP]);
+
+    return navOpData.map(navOp => ({
+        ...navOp,
+        risks: navOp.risks.split(","),
+        priority: getNavOpPriority(navOp.priority)
+    }));
+}
+
+function getNavOpPriority(priority: string): SeverityType {
+    switch (priority) {
+        case SeverityType.CRITICAL:
+            return SeverityType.CRITICAL;
+        case SeverityType.HIGH:
+            return SeverityType.HIGH;
+        case SeverityType.MEDIUM:
+            return SeverityType.MEDIUM;
+        default:
+            return SeverityType.LOW;
+    }
 }
